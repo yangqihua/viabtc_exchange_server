@@ -16,6 +16,12 @@ json_t *get_user_balance_history(MYSQL *conn, uint32_t user_id,
 
     size_t asset_len = strlen(asset);
     if (asset_len > 0) {
+        char _asset[2 * asset_len + 1];
+        mysql_real_escape_string(conn, _asset, asset, strlen(asset));
+        sql = sdscatprintf(sql, " AND `asset` = '%s'", _asset);
+    }
+    size_t business_len = strlen(business);
+    if (business_len > 0) {
         int _busLen = 2 * business_len + 1;
         char _business[_busLen];
         mysql_real_escape_string(conn, _business, business, business_len);
@@ -33,12 +39,6 @@ json_t *get_user_balance_history(MYSQL *conn, uint32_t user_id,
             sql = sdscatprintf(sql, " AND `business` = '%s'", _business);
         }
         sdsfreesplitres(businessArray, count);
-    }
-    size_t business_len = strlen(business);
-    if (business_len > 0) {
-        char _business[2 * business_len + 1];
-        mysql_real_escape_string(conn, _business, business, strlen(business));
-        sql = sdscatprintf(sql, " AND `business` = '%s'", _business);
     }
 
     if (start_time) {
